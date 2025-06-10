@@ -1,0 +1,80 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.feed-card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 32px 0 #0002;
+  padding: 1.2em 1.5em;
+  min-width: 260px;
+  max-width: 320px;
+  min-height: 80px;
+  font-size: 1.1em;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: auto;
+}
+.feed-card a {
+  color: #2a5cff;
+  text-decoration: none;
+  font-size: 1.15em;
+}
+.feed-card .desc {
+  margin-top: 0.5em;
+  font-size: 0.98em;
+  color: #444;
+  max-height: 4.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.App input[type="file"] {
+  margin: 1.5em 0 1em 0;
+}
+.App h1 {
+  font-size: 2.2em;
+  margin-bottom: 0.5em;
+  letter-spacing: 0.03em;
+}
