@@ -23,6 +23,7 @@ html, body, #root, .App {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: none;
 }
 .App > div[style] {
   height: 100vh !important;
@@ -125,6 +126,66 @@ body {
   letter-spacing: 0.03em;
 }
 
+.overlay-ui {
+  background: rgba(30, 20, 40, 0.55);
+  border-radius: 22px;
+  box-shadow: 0 8px 40px 0 #0006, 0 1.5px 8px 0 #a000ff33;
+  padding: 2em 2.5em 1.5em 2.5em;
+  min-width: 220px;
+  max-width: 90vw;
+  min-height: 80px;
+  font-size: 1.1em;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 10;
+  backdrop-filter: blur(16px) saturate(1.2);
+  border: 1.5px solid rgba(255,255,255,0.18);
+}
+.overlay-ui h1 {
+  font-size: 2em;
+  margin-bottom: 0.7em;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 16px #a000ff55;
+}
+.upload-btn {
+  background: linear-gradient(90deg, #a000ff 0%, #ff006a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7em 1.5em;
+  font-size: 1.1em;
+  cursor: pointer;
+  margin-bottom: 1em;
+  font-weight: 600;
+  box-shadow: 0 2px 12px #a000ff33;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.upload-btn:hover {
+  background: linear-gradient(90deg, #ff006a 0%, #a000ff 100%);
+  box-shadow: 0 4px 24px #ff006a55;
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Bauhaus-inspired feed scroll */
+.bauhaus-feed-scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100vw;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5em 0 2em 0;
+  overflow-y: auto;
+  height: 100vh;
+  background: linear-gradient(135deg, #f7f7f7 0%, #e2e2e2 100%);
+  box-shadow: 0 0 0 8px #e2e2e2;
+}
 .bauhaus-main {
   margin-left: 15vw;
   margin-right: 15vw;
@@ -143,7 +204,13 @@ body {
   align-items: flex-start;
   justify-content: flex-start;
   margin-bottom: 32px;
-  position: relative;
+}
+.bauhaus-logo {
+  font-size: 2.2em;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #111;
+  margin-right: 24px;
 }
 .bauhaus-gear {
   background: none;
@@ -212,48 +279,72 @@ body {
   max-width: 700px;
   text-align: left;
 }
-.bauhaus-settings-menu {
-  position: absolute;
-  top: 56px;
-  left: 0;
-  background: #fff;
-  border-radius: 0 0 18px 18px;
-  box-shadow: 0 8px 32px #0002;
-  padding: 1.5em 2em 1.2em 2em;
-  z-index: 100;
-  min-width: 220px;
-  font-family: inherit;
-}
-.bauhaus-settings-menu h2 {
+.feed-loading {
   font-size: 1.2em;
-  font-weight: 900;
-  margin: 0 0 1em 0;
-  letter-spacing: 0.01em;
+  color: #457b9d;
+  margin: 2em auto;
+  font-weight: 700;
 }
-.bauhaus-settings-option {
+.bauhaus-modal-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 1000;
   display: flex;
-  align-items: center;
-  gap: 0.7em;
-  font-size: 1.08em;
-  font-weight: 500;
-  color: #222;
-  margin-bottom: 0.7em;
+  align-items: flex-start;
+  justify-content: flex-start;
+  animation: modal-fadein 0.18s cubic-bezier(.7,0,.3,1);
+}
+.bauhaus-modal {
+  background: #fff;
+  color: #111;
+  margin: 80px 0 0 96px;
+  padding: 48px 56px 40px 48px;
+  border-radius: 0 18px 18px 0;
+  box-shadow: 0 8px 48px #0002;
+  min-width: 420px;
+  max-width: 600px;
+  animation: modal-slidein 0.18s cubic-bezier(.7,0,.3,1);
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-size: 2.2em;
+  background: none;
+  border: none;
+  color: #aaa;
   cursor: pointer;
+  font-weight: 700;
+  opacity: 0.7;
+  transition: opacity 0.12s;
 }
-.bauhaus-settings-option input[type="checkbox"] {
-  accent-color: #222;
-  width: 1.1em;
-  height: 1.1em;
+.modal-close:hover { opacity: 1; color: #e63946; }
+.bauhaus-modal h2 {
+  font-size: 2em;
+  font-weight: 900;
+  margin: 0 0 0.5em 0;
+  text-transform: uppercase;
 }
-.bauhaus-subtitle {
+.bauhaus-modal p {
+  font-size: 1.18em;
+  color: #222;
+  margin-bottom: 1.5em;
+}
+.bauhaus-modal a {
+  color: #457b9d;
+  font-weight: 700;
+  text-decoration: underline;
   font-size: 1.1em;
-  font-weight: 400;
-  color: #888;
-  margin-top: 0.18em;
-  margin-bottom: 0.18em;
-  margin-left: 0;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+}
+@keyframes modal-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-slidein {
+  from { transform: translateX(-48px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 .bauhaus-overlay-ui {
   background: #fff;
@@ -336,12 +427,48 @@ body {
   margin-top: 1em;
   font-size: 1.1em;
 }
-@media (max-width: 900px) {
-  .bauhaus-main {
-    margin-left: 4vw;
-    margin-right: 4vw;
-    width: 92vw;
-  }
+.bauhaus-settings-menu {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  background: #fff;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 8px 32px #0002;
+  padding: 1.5em 2em 1.2em 2em;
+  z-index: 100;
+  min-width: 220px;
+  font-family: inherit;
+}
+.bauhaus-settings-menu h2 {
+  font-size: 1.2em;
+  font-weight: 900;
+  margin: 0 0 1em 0;
+  letter-spacing: 0.01em;
+}
+.bauhaus-settings-option {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 0.7em;
+  cursor: pointer;
+}
+.bauhaus-settings-option input[type="checkbox"] {
+  accent-color: #222;
+  width: 1.1em;
+  height: 1.1em;
+}
+.bauhaus-subtitle {
+  font-size: 1.1em;
+  font-weight: 400;
+  color: #888;
+  margin-top: 0.18em;
+  margin-bottom: 0.18em;
+  margin-left: 0;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
 }
 @media (max-width: 700px) {
   .bauhaus-main, .bauhaus-modal {
@@ -350,13 +477,27 @@ body {
     min-width: 0;
     max-width: 100vw;
   }
+  .bauhaus-modal {
+    margin-top: 48px;
+    padding: 32px 4vw 32px 4vw;
+  }
+  .headline {
+    font-size: 1.5em;
+  }
+  .headline-accent {
+    margin-right: 16px;
+  }
   .bauhaus-overlay-ui {
     min-width: 0;
     max-width: 98vw;
     padding: 32px 4vw 32px 4vw;
     margin: 32px 0 0 0;
   }
-  .headline {
-    font-size: 1.5em;
+}
+@media (max-width: 900px) {
+  .bauhaus-main {
+    margin-left: 4vw;
+    margin-right: 4vw;
+    width: 92vw;
   }
 }

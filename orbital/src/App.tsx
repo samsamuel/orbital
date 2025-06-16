@@ -1,3 +1,4 @@
+import { parseOPML } from './feedUtils'
 import './App.css'
 import { useRef, useState } from 'react'
 import FeedList from './FeedList'
@@ -18,7 +19,6 @@ function App() {
       setLoading(true)
       setError('')
       try {
-        const { parseOPML } = await import('./feedUtils')
         const urls = await parseOPML(e.target.files[0])
         if (!urls.length) throw new Error('No feeds found in OPML')
         setFeedUrls(urls)
