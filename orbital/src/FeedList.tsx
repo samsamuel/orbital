@@ -20,7 +20,7 @@ function FeedList({ feedUrls, settingsOnly, settings, setSettings }: {
   const [loading, setLoading] = useState(true)
   const [firstLoad, setFirstLoad] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const timer = useRef<NodeJS.Timeout | null>(null)
+  const timer = useRef<number | null>(null)
 
   // Helper to compare arrays of stories by link
   function storiesAreEqual(a: any[], b: any[]) {
@@ -51,7 +51,7 @@ function FeedList({ feedUrls, settingsOnly, settings, setSettings }: {
     setLoading(true)
     loadFeeds(true)
     timer.current = setInterval(() => loadFeeds(), 15000)
-    return () => timer.current && clearInterval(timer.current)
+    return () => { if (timer.current) clearInterval(timer.current) }
   }, [feedUrls, settingsOnly])
 
   // Animate feed list
@@ -75,12 +75,12 @@ function FeedList({ feedUrls, settingsOnly, settings, setSettings }: {
       {settingsOpen && (
         <div className="bauhaus-settings-menu" style={{ right: 0, left: 'auto' }}>
           <h2>Subtitle Info</h2>
-          {Object.entries(defaultSettings).map(([key, label]) => (
+          {Object.entries(defaultSettings).map(([key]) => (
             <label key={key} className="bauhaus-settings-option">
               <input
                 type="checkbox"
-                checked={settings[key]}
-                onChange={() => setSettings(s => ({ ...s, [key]: !s[key] }))}
+                checked={settings[key as keyof typeof defaultSettings]}
+                onChange={() => setSettings(s => ({ ...s, [key]: !s[key as keyof typeof defaultSettings] }))}
               />
               {key.charAt(0).toUpperCase() + key.slice(1)}
             </label>

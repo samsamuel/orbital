@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/fetch-feed': 'http://localhost:3001'
+      '/fetch-feed': 'http://localhost:3000'
     }
   }
 })
