@@ -1,16 +1,25 @@
-import { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Html, Text, RoundedBox } from '@react-three/drei'
 import { parseOPML, fetchAllFeeds } from './feedUtils'
 import * as THREE from 'three'
 import './App.css'
+import { a, useSpring, useSprings } from '@react-spring/three'
+import { useEffect, useRef, useState } from 'react'
 
-function FeedCard({ story, position }: { story: any, position: [number, number, number] }) {
+function AnimatedFeedCard({ story, position, isLeaving, onRemove }: { story: any, position: [number, number, number], isLeaving: boolean, onRemove?: () => void }) {
   const groupRef = useRef<THREE.Group>(null)
   useFrame(({ camera }) => {
     if (groupRef.current) {
       groupRef.current.lookAt(camera.position)
     }
+  })
+  // Animate scale and opacity: pop in from 0, pop out to 0
+  const { scale, opacity } = useSpring({
+    scale: isLeaving ? 0 : 1,
+    opacity: isLeaving ? 0 : 1,
+    from: { scale: 1, opacity: 1 },
+    config: { mass: 1, tension: 180, friction: 18 },
+    onRest: () => { if (isLeaving && onRemove) onRemove() },
   })
   const bevelSize = 0.08
   const bevelSegments = 6
@@ -21,7 +30,7 @@ function FeedCard({ story, position }: { story: any, position: [number, number, 
     }
   }
   return (
-    <group ref={groupRef} position={position}>
+    <a.group ref={groupRef} position={position} scale={scale}>
       {/* Extruded and beveled card using Drei's RoundedBox */}
       <RoundedBox
         args={[2, 1.2, 0.25]}
@@ -32,7 +41,7 @@ function FeedCard({ story, position }: { story: any, position: [number, number, 
         onPointerOut={e => { e.stopPropagation(); document.body.style.cursor = 'default'; }}
       >
         {/* Frosted glass effect using Drei's MeshTransmissionMaterial */}
-        <meshPhysicalMaterial
+        <a.meshPhysicalMaterial
           color={'#fff'}
           metalness={0.15}
           roughness={0.18}
@@ -44,6 +53,8 @@ function FeedCard({ story, position }: { story: any, position: [number, number, 
           reflectivity={0.18}
           attenuationColor="#a000ff"
           attenuationDistance={1.8}
+          transparent
+          opacity={opacity}
         />
       </RoundedBox>
       {/* Beveled border as a slightly larger transparent RoundedBox */}
@@ -52,19 +63,18 @@ function FeedCard({ story, position }: { story: any, position: [number, number, 
         radius={bevelSize}
         smoothness={bevelSegments}
       >
-        <meshStandardMaterial color={'#2a5cff'} transparent opacity={0.18} />
+        <a.meshStandardMaterial color={'#2a5cff'} transparent opacity={opacity.to(o => o * 0.18)} />
       </RoundedBox>
       <Text
         position={[0, 0.05, 0.14]} // Lowered for better vertical centering
         fontSize={0.18}
-        color="#222"
+        color="#fff"
         maxWidth={1.7}
         anchorX="center"
         anchorY="middle"
-        outlineColor="#fff"
-        outlineWidth={0.01}
+        outlineWidth={0}
         textAlign="center"
-        font="/assets/Inter-Regular.ttf"
+        font="/assets/Inter_28pt-Regular.ttf"
       >
         {story.title.length > 60 ? story.title.slice(0, 57) + '...' : story.title}
       </Text>
@@ -72,19 +82,20 @@ function FeedCard({ story, position }: { story: any, position: [number, number, 
         <Text
           position={[0, -0.22, 0.14]} // Raised for better balance
           fontSize={0.12}
-          color="#444"
+          color="#fff"
           maxWidth={1.7}
           anchorX="center"
           anchorY="top"
+          outlineWidth={0}
           textAlign="center"
-          font="/assets/Inter-Regular.ttf"
+          font="/assets/Inter_28pt-Regular.ttf"
         >
           {(story.contentSnippet || story.content).length > 120
             ? (story.contentSnippet || story.content).slice(0, 117) + '...'
             : (story.contentSnippet || story.content)}
         </Text>
       ) : null}
-    </group>
+    </a.group>
   )
 }
 
@@ -123,32 +134,68 @@ function Globe() {
   )
 }
 
-function AnimatedRing({ stories, children }: { stories: any[], children: (positions: [number, number, number][]) => React.ReactNode }) {
+function AnimatedRing({ stories, ringSize, children }: { stories: any[], ringSize: number, children: (positions: [number, number, number][]) => React.ReactNode }) {
   const group = useRef<THREE.Group>(null)
-  // Animate the group rotation
   useFrame((_state, delta) => {
     if (group.current) {
       group.current.rotation.y += delta * 0.07 // slow orbit
     }
   })
-  // Calculate card positions in a ring
+  // Always use the max of stories.length and ringSize for the number of positions
+  const count = Math.max(stories.length, ringSize)
   const radius = 6
-  const cardPositions = stories.map((_: any, i: number) => {
-    const angle = (i / stories.length) * Math.PI * 2
+  const cardPositions = Array.from({ length: count }).map((_, i) => {
+    const angle = (i / count) * Math.PI * 2
     return [Math.cos(angle) * radius, 0, Math.sin(angle) * radius] as [number, number, number]
   })
-  return <group ref={group}>{children(cardPositions)}</group>
+
+  // Map each story to its intended position index
+  const positionsByKey: Record<string, [number, number, number]> = {}
+  stories.forEach((story, i) => {
+    // For leaving stories, use their _prevIndex if available
+    const idx = story._prevIndex !== undefined && story._prevIndex >= 0 && story._prevIndex < count ? story._prevIndex : i
+    positionsByKey[story.link + (story.isLeaving ? '-leaving' : '')] = cardPositions[idx]
+  })
+
+  // Use stable dependency for useSprings
+  const [springs, api] = useSprings(
+    stories.length,
+    index => ({
+      position: positionsByKey[stories[index].link + (stories[index].isLeaving ? '-leaving' : '')],
+      config: { mass: 1, tension: 120, friction: 18 },
+    }),
+    [stories.length, count]
+  )
+
+  return (
+    <group ref={group}>
+      {children(springs.map(s => s.position.get()))}
+    </group>
+  )
+}
+
+// Helper: assign previous index to leaving stories
+function attachPrevIndex(leavingStories: any[], prevVisible: any[]) {
+  return leavingStories.map(story => {
+    const prevIdx = prevVisible.findIndex(v => v.link === story.link)
+    return { ...story, _prevIndex: prevIdx }
+  })
 }
 
 function App() {
   const [feedUrls, setFeedUrls] = useState<string[]>([])
   const [stories, setStories] = useState<any[]>([])
+  const [visibleStories, setVisibleStories] = useState<any[]>([])
+  const [leavingStories, setLeavingStories] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [showOverlay, setShowOverlay] = useState(true)
   const [urlInput, setUrlInput] = useState('')
   const [inputMode, setInputMode] = useState<'opml' | 'url'>('opml')
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const prevVisibleStories = useRef<any[]>([])
+  const [ringSize, setRingSize] = useState(0)
+
   const handleUploadClick = () => fileInputRef.current?.click()
 
   const handleOPML = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,6 +235,45 @@ function App() {
     setLoading(false)
   }
 
+  // Animate visible stories: pop in new, fade out old
+  useEffect(() => {
+    // Find new and removed stories
+    const newStories = stories.filter(s => !visibleStories.some(v => v.link === s.link))
+    const removedStories = visibleStories.filter(v => !stories.some(s => s.link === v.link))
+
+    // On first load, set ring size
+    if (ringSize === 0 && stories.length > 0) setRingSize(stories.length)
+
+    // Add new stories
+    if (newStories.length > 0) {
+      setVisibleStories(prev => [...prev, ...newStories])
+      // Delay ringSize update to next tick to ensure animation triggers
+      setTimeout(() => {
+        setRingSize(stories.length + removedStories.length)
+      }, 10)
+    }
+    // Animate out removed stories, attach previous index
+    if (removedStories.length > 0) {
+      setLeavingStories(prev => [
+        ...prev,
+        ...attachPrevIndex(removedStories, prevVisibleStories.current)
+      ])
+      setTimeout(() => {
+        setLeavingStories(prev => prev.filter(l => !removedStories.some(r => r.link === l.link)))
+        setVisibleStories(current => current.filter(v => !removedStories.some(r => r.link === v.link)))
+        // After all leaving cards are gone, update ring size
+        setRingSize(stories.length)
+      }, 600)
+    }
+    // If no change, just sync (but do not reorder to avoid flash)
+    if (newStories.length === 0 && removedStories.length === 0 && stories.length === visibleStories.length) {
+      setVisibleStories(prev => prev.map(v => stories.find(s => s.link === v.link) || v))
+      setRingSize(stories.length)
+    }
+    // Store previous visible stories for next update
+    prevVisibleStories.current = [...visibleStories]
+  }, [stories])
+
   useEffect(() => {
     if (feedUrls.length) {
       loadFeeds()
@@ -198,6 +284,14 @@ function App() {
     return undefined
   }, [feedUrls])
 
+  // Debug: log state on every render
+  useEffect(() => {
+    console.log('VISIBLE:', visibleStories.map(s => s.title))
+    console.log('LEAVING:', leavingStories.map(s => s.title))
+    console.log('RINGSIZE:', ringSize)
+    console.log('STORIES:', stories.map(s => s.title))
+  }, [visibleStories, leavingStories, ringSize, stories])
+
   return (
     <div className="App">
       <Canvas camera={{ position: [0, 5, 12], fov: 60 }} shadows>
@@ -205,10 +299,35 @@ function App() {
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
         <OrbitControls enablePan enableZoom enableRotate />
         <Globe />
-        <AnimatedRing stories={stories}>
-          {(cardPositions) => stories.map((story, i) => (
-            <FeedCard key={story.link} story={story} position={cardPositions[i]} />
-          ))}
+        {/* AnimatedRing now always gets visible + leaving stories, and a stable ringSize */}
+        {/* Each leaving card is rendered at its previous index */}
+        <AnimatedRing stories={visibleStories.concat(leavingStories.map(s => ({ ...s, isLeaving: true })))} ringSize={ringSize}>
+          {(cardPositions) => {
+            const visibleCount = visibleStories.length;
+            return (
+              <>
+                {visibleStories.map((story, i) => (
+                  <AnimatedFeedCard
+                    key={story.link}
+                    story={story}
+                    position={cardPositions[i]}
+                    isLeaving={false}
+                  />
+                ))}
+                {leavingStories.map((story, i) => {
+                  const prevIdx = story._prevIndex !== undefined && story._prevIndex >= 0 && story._prevIndex < cardPositions.length ? story._prevIndex : (visibleCount + i < cardPositions.length ? visibleCount + i : cardPositions.length - 1)
+                  return (
+                    <AnimatedFeedCard
+                      key={story.link + '-leaving'}
+                      story={story}
+                      position={cardPositions[visibleCount + i]}
+                      isLeaving={true}
+                    />
+                  )
+                })}
+              </>
+            )
+          }}
         </AnimatedRing>
         {showOverlay && (
           <Html center style={{ pointerEvents: 'auto', zIndex: 10 }}>

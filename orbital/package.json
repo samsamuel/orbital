@@ -12,11 +12,13 @@
     "backend": "node server.js"
   },
   "dependencies": {
+    "@react-spring/three": "^10.0.1",
+    "@react-spring/web": "^10.0.1",
     "@react-three/drei": "^10.1.2",
     "@react-three/fiber": "^9.1.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "framer-motion": "^12.16.0",
+    "framer-motion": "^12.18.1",
     "node-fetch": "^3.3.2",
     "opmlparser": "^0.8.0",
     "react": "^19.1.0",

@@ -7,7 +7,7 @@ html, body, #root, .App {
   width: 100vw;
   overflow: hidden;
   box-sizing: border-box;
-  font-family: 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   background: linear-gradient(135deg, #2d0036 0%, #6a0037 100%);
 }
 .App {
