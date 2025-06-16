@@ -1,14 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
 html, body, #root, .App {
-  height: 100%;
+  background: #fff;
+  color: #111;
+  font-family: 'Inter', 'Futura', 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
   width: 100vw;
-  overflow: hidden;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #2d0036 0%, #6a0037 100%);
 }
 .App {
   width: 100vw;
@@ -125,61 +125,238 @@ body {
   letter-spacing: 0.03em;
 }
 
-.overlay-ui {
-  background: rgba(30, 20, 40, 0.55);
-  border-radius: 22px;
-  box-shadow: 0 8px 40px 0 #0006, 0 1.5px 8px 0 #a000ff33;
-  padding: 2em 2.5em 1.5em 2.5em;
-  min-width: 220px;
-  max-width: 90vw;
-  min-height: 80px;
-  font-size: 1.1em;
-  color: #fff;
+.bauhaus-main {
+  margin-left: 15vw;
+  margin-right: 15vw;
+  max-width: none;
+  width: 70vw;
+  padding: 0;
+  min-height: 100vh;
+  height: 100vh;
+  background: #fff;
   display: flex;
   flex-direction: column;
+}
+.bauhaus-header {
+  height: 64px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 32px;
+  position: relative;
+}
+.bauhaus-gear {
+  background: none;
+  border: none;
+  margin-left: 0;
+  margin-top: 8px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.bauhaus-gear:hover { opacity: 1; }
+.bauhaus-feed-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding-right: 8px;
+}
+.scroll-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.scroll-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.bauhaus-headline-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 56px;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.12s;
+  padding: 0;
+  background: none;
+  text-decoration: none;
+  color: #111;
+  width: 100%;
+  text-align: left;
+}
+.bauhaus-headline-row:focus, .bauhaus-headline-row:hover {
+  background: #f7f7f7;
+}
+.headline {
+  font-size: 3.2em;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.18;
+  color: #111;
+  margin-bottom: 0.18em;
+  text-transform: none;
+  text-align: left;
+}
+.subheadline {
+  font-size: 1.3em;
+  font-weight: 400;
+  color: #444;
+  margin-top: 0.18em;
+  margin-left: 0;
+  line-height: 1.5;
+  max-width: 700px;
+  text-align: left;
+}
+.bauhaus-settings-menu {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  background: #fff;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 8px 32px #0002;
+  padding: 1.5em 2em 1.2em 2em;
+  z-index: 100;
+  min-width: 220px;
+  font-family: inherit;
+}
+.bauhaus-settings-menu h2 {
+  font-size: 1.2em;
+  font-weight: 900;
+  margin: 0 0 1em 0;
+  letter-spacing: 0.01em;
+}
+.bauhaus-settings-option {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  z-index: 10;
-  backdrop-filter: blur(16px) saturate(1.2);
-  border: 1.5px solid rgba(255,255,255,0.18);
-}
-.overlay-ui h1 {
-  font-size: 2em;
+  gap: 0.7em;
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #222;
   margin-bottom: 0.7em;
-  letter-spacing: 0.03em;
-  font-weight: 600;
-  color: #fff;
-  text-shadow: 0 2px 16px #a000ff55;
+  cursor: pointer;
 }
-.upload-btn {
-  background: linear-gradient(90deg, #a000ff 0%, #ff006a 100%);
+.bauhaus-settings-option input[type="checkbox"] {
+  accent-color: #222;
+  width: 1.1em;
+  height: 1.1em;
+}
+.bauhaus-subtitle {
+  font-size: 1.1em;
+  font-weight: 400;
+  color: #888;
+  margin-top: 0.18em;
+  margin-bottom: 0.18em;
+  margin-left: 0;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+.bauhaus-overlay-ui {
+  background: #fff;
+  color: #111;
+  border-radius: 0 24px 24px 0;
+  box-shadow: 0 8px 48px #0002;
+  padding: 64px 56px 48px 96px;
+  min-width: 420px;
+  max-width: 520px;
+  margin: 80px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Inter', 'Futura', 'Helvetica Neue', Arial, sans-serif;
+}
+.bauhaus-overlay-ui h1 {
+  font-size: 2.6em;
+  font-weight: 900;
+  margin: 0 0 1.2em 0;
+  letter-spacing: 0.01em;
+}
+.bauhaus-overlay-tabs {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 2em;
+}
+.bauhaus-tab, .bauhaus-tab-active {
+  background: none;
+  border: none;
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #888;
+  padding: 0.5em 1.2em;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.bauhaus-tab-active {
+  color: #111;
+  background: #f7b32b;
+  box-shadow: 0 2px 8px #f7b32b33;
+}
+.bauhaus-upload-btn {
+  background: #111;
   color: #fff;
   border: none;
-  border-radius: 12px;
-  padding: 0.7em 1.5em;
+  border-radius: 8px;
+  padding: 0.7em 2em;
   font-size: 1.1em;
-  cursor: pointer;
+  font-weight: 700;
+  margin-top: 1em;
   margin-bottom: 1em;
-  font-weight: 600;
-  box-shadow: 0 2px 12px #a000ff33;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  cursor: pointer;
+  box-shadow: 0 2px 12px #0001;
+  transition: background 0.18s, color 0.18s;
 }
-.upload-btn:hover {
-  background: linear-gradient(90deg, #ff006a 0%, #a000ff 100%);
-  box-shadow: 0 4px 24px #ff006a55;
-  transform: translateY(-2px) scale(1.04);
+.bauhaus-upload-btn:hover {
+  background: #e63946;
+  color: #fff;
+}
+.bauhaus-url-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1em;
+  width: 100%;
+}
+.bauhaus-url-input {
+  font-size: 1.1em;
+  padding: 0.7em 1em;
+  border-radius: 8px;
+  border: 1.5px solid #bbb;
+  width: 100%;
+  margin-bottom: 0.5em;
+  font-family: inherit;
+}
+.bauhaus-error {
+  color: #e63946;
+  font-weight: 700;
+  margin-top: 1em;
+  font-size: 1.1em;
+}
+@media (max-width: 900px) {
+  .bauhaus-main {
+    margin-left: 4vw;
+    margin-right: 4vw;
+    width: 92vw;
+  }
 }
 @media (max-width: 700px) {
-  .overlay-ui {
-    padding: 1em 0.5em;
+  .bauhaus-main, .bauhaus-modal {
+    margin-left: 0;
+    padding: 24px 8vw 24px 8vw;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  .bauhaus-overlay-ui {
     min-width: 0;
     max-width: 98vw;
-    font-size: 1em;
+    padding: 32px 4vw 32px 4vw;
+    margin: 32px 0 0 0;
   }
-  .feed-card {
-    min-width: 120px;
-    max-width: 90vw;
-    font-size: 0.95em;
+  .headline {
+    font-size: 1.5em;
   }
 }

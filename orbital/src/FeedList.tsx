@@ -21,7 +21,6 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
   })
   const timer = useRef<NodeJS.Timeout | null>(null)
 
-  // Helper to compare arrays of stories by link
   function storiesAreEqual(a: any[], b: any[]) {
     if (a.length !== b.length) return false
     for (let i = 0; i < a.length; i++) {
@@ -30,7 +29,6 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
     return true
   }
 
-  // Fetch and update stories every 15 seconds, but only update if changed
   const loadFeeds = async (isFirst = false) => {
     if (!feedUrls.length) return
     if (isFirst) setLoading(true)
@@ -51,15 +49,12 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
     if (timer.current) clearInterval(timer.current)
     timer.current = setInterval(() => loadFeeds(false), 15000)
     return () => { if (timer.current) clearInterval(timer.current) }
-    // eslint-disable-next-line
   }, [feedUrls])
 
-  // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem('bauhaus-settings', JSON.stringify(settings))
   }, [settings])
 
-  // Animate new stories in, and reorder with smooth transitions
   const transitions = useTransition(stories, {
     keys: story => story.link,
     from: { opacity: 0, transform: 'translateY(-32px)' },
@@ -89,7 +84,7 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
                   checked={settings[key]}
                   onChange={() => setSettings(s => ({ ...s, [key]: !s[key] }))}
                 />
-                {key.charAt(0).toUpperCase() + key.slice(1).replace('Count', ' Count')}
+                {key.charAt(0).toUpperCase() + key.slice(1)}
               </label>
             ))}
           </div>
@@ -97,7 +92,7 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
       </div>
       <div className="bauhaus-feed-list scroll-hide">
         {loading && firstLoad && <div className="feed-loading">Loading...</div>}
-        {transitions((style, story) => (
+        {transitions((style, story, t, index) => (
           <animated.a
             className="bauhaus-headline-row"
             href={story.link}
@@ -105,11 +100,26 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
             rel="noopener noreferrer"
             tabIndex={0}
             role="link"
-            style={{ ...style, textAlign: 'left', width: '100%' }}
+            style={{
+              ...style,
+              textAlign: 'left',
+              width: '100%',
+            }}
             key={story.link}
           >
             <div style={{ textAlign: 'left', width: '100%' }}>
-              <div className="headline" style={{ fontSize: '3.2em', textAlign: 'left' }}>{story.title}</div>
+              <div
+                className="headline"
+                style={{
+                  fontSize: index === 0 ? '4.3em' : '3.2em',
+                  fontWeight: 900,
+                  textAlign: 'left',
+                  lineHeight: 1.18,
+                  transition: 'font-size 0.18s cubic-bezier(.7,0,.3,1)',
+                }}
+              >
+                {story.title}
+              </div>
               <BauhausSubtitle story={story} settings={settings} />
               {story.contentSnippet && (
                 <div className="subheadline" style={{ textAlign: 'left' }}>{story.contentSnippet}</div>
