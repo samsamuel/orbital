@@ -21,6 +21,39 @@ Orbital is a beautiful spatial RSS feed reader built with React, Vite, and Three
 3. Open the app in your browser (usually at http://localhost:5173)
 4. Upload your OPML file to see your feeds in 3D!
 
+## Running with Docker
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) installed
+- [Docker Compose](https://docs.docker.com/compose/install/) installed
+
+### Steps
+
+1. **Build the Docker image:**
+   ```bash
+   docker-compose build
+   ```
+2. **Start the application:**
+   ```bash
+   docker-compose up
+   ```
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend API: [http://localhost:3000](http://localhost:3000)
+
+3. **Stop the application:**
+   Press `Ctrl+C` in the terminal, then run:
+   ```bash
+   docker-compose down
+   ```
+
+### Notes
+- Rebuild the image after code changes:
+  ```bash
+  docker-compose build
+  docker-compose up
+  ```
+- For development, consider using Docker volumes or bind mounts for live code updates.
+
 ## Tech Stack
 - React + Vite
 - TypeScript
