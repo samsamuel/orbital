@@ -1,7 +1,15 @@
+import React from 'react'
 import { parseOPML } from './feedUtils'
 import './App.css'
 import { useRef, useState } from 'react'
 import FeedList from './FeedList'
+
+const defaultSettings = {
+  date: true,
+  time: true,
+  age: true,
+  source: true,
+}
 
 function App() {
   const [feedUrls, setFeedUrls] = useState<string[]>([])
@@ -11,6 +19,15 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('bauhaus-settings')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      delete parsed.nightMode
+      return parsed
+    }
+    return defaultSettings
+  })
 
   const handleUploadClick = () => fileInputRef.current?.click()
 
@@ -39,6 +56,11 @@ function App() {
     setShowOverlay(false)
     setLoading(false)
   }
+
+  // Save settings to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('bauhaus-settings', JSON.stringify(settings))
+  }, [settings])
 
   return (
     <div className="App">
@@ -82,7 +104,12 @@ function App() {
           {error && <div className="bauhaus-error">{error}</div>}
         </div>
       ) : (
-        <FeedList feedUrls={feedUrls} />
+        <>
+          <div className="bauhaus-topright-menu">
+            <FeedList feedUrls={feedUrls} settingsOnly settings={settings} setSettings={setSettings} />
+          </div>
+          <FeedList feedUrls={feedUrls} settingsOnly={false} settings={settings} setSettings={setSettings} />
+        </>
       )}
     </div>
   )

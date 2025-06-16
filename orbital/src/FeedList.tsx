@@ -10,21 +10,16 @@ const defaultSettings = {
   source: true,
 }
 
-function FeedList({ feedUrls }: { feedUrls: string[] }) {
+function FeedList({ feedUrls, settingsOnly, settings, setSettings }: {
+  feedUrls: string[],
+  settingsOnly?: boolean,
+  settings: typeof defaultSettings,
+  setSettings: React.Dispatch<React.SetStateAction<typeof defaultSettings>>
+}) {
   const [stories, setStories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [firstLoad, setFirstLoad] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('bauhaus-settings')
-    // Remove nightMode from loaded settings if present
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      delete parsed.nightMode
-      return parsed
-    }
-    return defaultSettings
-  })
   const timer = useRef<NodeJS.Timeout | null>(null)
 
   // Helper to compare arrays of stories by link
@@ -52,54 +47,51 @@ function FeedList({ feedUrls }: { feedUrls: string[] }) {
   }
 
   useEffect(() => {
-    setFirstLoad(true)
+    if (settingsOnly) return
+    setLoading(true)
     loadFeeds(true)
-    if (timer.current) clearInterval(timer.current)
-    timer.current = setInterval(() => loadFeeds(false), 15000)
-    return () => { if (timer.current) clearInterval(timer.current) }
-    // eslint-disable-next-line
-  }, [feedUrls])
+    timer.current = setInterval(() => loadFeeds(), 15000)
+    return () => timer.current && clearInterval(timer.current)
+  }, [feedUrls, settingsOnly])
 
-  // Save settings to localStorage
-  useEffect(() => {
-    localStorage.setItem('bauhaus-settings', JSON.stringify(settings))
-  }, [settings])
-
-  // Animate new stories in, and reorder with smooth transitions
+  // Animate feed list
   const transitions = useTransition(stories, {
     keys: story => story.link,
-    from: { opacity: 0, transform: 'translateY(-32px)' },
+    from: { opacity: 0, transform: 'translateY(20px)' },
     enter: { opacity: 1, transform: 'translateY(0)' },
-    leave: { opacity: 0, transform: 'translateY(32px)' },
-    config: { tension: 220, friction: 22 },
-    trail: 0,
-    sort: (a, b) => new Date(b.pubDate || 0).getTime() - new Date(a.pubDate || 0).getTime(),
+    leave: { opacity: 0, transform: 'translateY(-20px)' },
+    trail: 40,
   })
 
-  return (
+  return settingsOnly ? (
+    <div className="bauhaus-header" style={{ position: 'relative' }}>
+      <button className="bauhaus-gear" aria-label="Settings" onClick={() => setSettingsOpen(v => !v)}>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="7" width="20" height="3" rx="1.5" fill="#222"/>
+          <rect x="4" y="13" width="20" height="3" rx="1.5" fill="#222"/>
+          <rect x="4" y="19" width="20" height="3" rx="1.5" fill="#222"/>
+        </svg>
+      </button>
+      {settingsOpen && (
+        <div className="bauhaus-settings-menu" style={{ right: 0, left: 'auto' }}>
+          <h2>Subtitle Info</h2>
+          {Object.entries(defaultSettings).map(([key, label]) => (
+            <label key={key} className="bauhaus-settings-option">
+              <input
+                type="checkbox"
+                checked={settings[key]}
+                onChange={() => setSettings(s => ({ ...s, [key]: !s[key] }))}
+              />
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  ) : (
     <main className={"bauhaus-main" }>
-      <div className="bauhaus-header">
-        <button className="bauhaus-gear" aria-label="Settings" onClick={() => setSettingsOpen(v => !v)}>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="12" y="4" width="4" height="20" rx="2" fill="#222"/>
-            <rect x="4" y="12" width="20" height="4" rx="2" fill="#222"/>
-          </svg>
-        </button>
-        {settingsOpen && (
-          <div className="bauhaus-settings-menu">
-            <h2>Subtitle Info</h2>
-            {Object.entries(defaultSettings).map(([key, label]) => (
-              <label key={key} className="bauhaus-settings-option">
-                <input
-                  type="checkbox"
-                  checked={settings[key]}
-                  onChange={() => setSettings(s => ({ ...s, [key]: !s[key] }))}
-                />
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </label>
-            ))}
-          </div>
-        )}
+      <div className="bauhaus-header" style={{ position: 'relative' }}>
+        <div style={{ flex: 1 }} />
       </div>
       <div className="bauhaus-feed-list scroll-hide">
         {loading && firstLoad && <div className="feed-loading">Loading...</div>}
@@ -138,16 +130,33 @@ function BauhausSubtitle({ story, settings }: { story: any, settings: typeof def
       const now = new Date()
       const diff = Math.floor((now.getTime() - dateObj.getTime()) / 1000)
       let age = ''
-      if (diff < 60) age = `${diff}s ago`
-      else if (diff < 3600) age = `${Math.floor(diff/60)}m ago`
-      else if (diff < 86400) age = `${Math.floor(diff/3600)}h ago`
-      else age = `${Math.floor(diff/86400)}d ago`
+      if (diff < 60) {
+        age = `${diff} seconds ago`
+      } else if (diff < 3600) {
+        const mins = Math.floor(diff / 60)
+        age = mins === 1 ? '1min ago' : `${mins}mins ago`
+      } else if (diff < 86400) {
+        const hrs = Math.floor(diff / 3600)
+        age = hrs === 1 ? '1hr ago' : `${hrs}hrs ago`
+      } else {
+        age = `${Math.floor(diff / 86400)} days ago`
+      }
       parts.push(age)
     }
   }
-  if (settings.source && story.feedTitle) parts.push(story.feedTitle)
-  if (!parts.length) return null
-  return <div className="bauhaus-subtitle">{parts.join(' · ')}</div>
+  if (settings.source && story.feedTitle) {
+    parts.push(story.feedTitle)
+  }
+  return (
+    <div className="bauhaus-subtitle" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', fontSize: '0.8em', color: '#555' }}>
+      {parts.map((part, index) => (
+        <span key={index} className="bauhaus-subtitle-part" style={{ whiteSpace: 'nowrap' }}>
+          {index > 0 && <span style={{ margin: '0 0.4em' }}>•</span>}
+          {part}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export default FeedList
